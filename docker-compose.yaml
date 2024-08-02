@@ -1,0 +1,77 @@
+networks:
+  homeautomation:
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ./hass-config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: always
+    privileged: true
+    depends_on:
+      homegear:
+        condition: service_healthy
+    networks:
+      homeautomation:
+    ports:
+      - protocol: tcp
+        published: 8123
+        target: 8123
+    devices:
+      - /dev/ttyAMA0
+
+  homegear:
+    healthcheck:
+      test: ["CMD", "homegear", "-l"]
+      start_period: 30s
+    devices:
+    - /dev/spidev0.0
+    - /dev/ttyACM0
+    environment:
+      HOST_USER_GID: '1000'
+      HOST_USER_ID: '1000'
+      TZ: Europe/Berlin
+    hostname: homegear
+    image: homegear/homegear:latest
+    restart: always
+    labels:
+      docker.group: homegear
+    networks:
+      homeautomation:
+    ports:
+    - protocol: tcp
+      published: 8080
+      target: 80
+    - protocol: tcp
+      published: 8443
+      target: 443
+    - protocol: tcp
+      published: 2001
+      target: 2001
+    - protocol: tcp
+      published: 2002
+      target: 2002
+    - protocol: tcp
+      published: 2003
+      target: 2003
+    volumes:
+    - ./homegear-config/etc:/etc/homegear:Z
+    - ./homegear-config/lib:/var/lib/homegear:Z
+    - ./homegear-config/log:/var/log/homegear:Z
+    - /sys:/sys:rw
+    - ./start.sh:/start.sh
+
+  node-red:
+    image: nodered/node-red:latest
+    restart: always
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "1880:1880"
+    networks:
+      homeautomation:
+    volumes:
+      - ./nodered-config:/data
