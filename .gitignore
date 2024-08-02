@@ -1,2 +1,4 @@
+# ignore configs
 homegear/homegear
 homeassistant/config
+node-red/node-red

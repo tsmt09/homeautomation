@@ -1,0 +1,39 @@
+networks:
+  homegear:
+services:
+  homegear:
+    devices:
+    - /dev/spidev0.0
+    - /dev/ttyACM0
+    environment:
+      HOST_USER_GID: '1000'
+      HOST_USER_ID: '1000'
+      TZ: Europe/Berlin
+    hostname: homegear
+    image: homegear/homegear:latest
+    labels:
+      docker.group: homegear
+    networks:
+      homegear:
+    ports:
+    - protocol: tcp
+      published: 8080
+      target: 80
+    - protocol: tcp
+      published: 8443
+      target: 443
+    - protocol: tcp
+      published: 2001
+      target: 2001
+    - protocol: tcp
+      published: 2002
+      target: 2002
+    - protocol: tcp
+      published: 2003
+      target: 2003
+    volumes:
+    - ./homegear/etc:/etc/homegear:Z
+    - ./homegear/lib:/var/lib/homegear:Z
+    - ./homegear/log:/var/log/homegear:Z
+    - /sys:/sys:rw
+    - ./start.sh:/start.sh
