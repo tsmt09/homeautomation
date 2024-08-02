@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ~/docker
+
 echo "------ stopping services" 
 
 cd homegear
