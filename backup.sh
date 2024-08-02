@@ -1,12 +1,24 @@
 #!/bin/bash
 
-# make backup on remote
-date=`date '+%F'`
+echo "------ stopping services" 
+
+cd homegear
+# docker compose stop
+cd ../homeassistant
+# docker compose stop
+cd ../node-red
+# docker compose stop
+
+cd ~
+date=`date '+%FT%H%M%S'`
 filename=${date}_ha_backup.tgz
+echo "------ backing up '$filename'" 
+sudo tar czvpf ${filename} docker
 
-echo "backing up $filename" 
-
-ssh ts@homeassistant.local "sudo tar czvpf ${filename} docker"
-scp ts@homeassistant.local:${filename} .
-ssh ts@homeassistant.local "rm ${filename}"
-
+echo "------ restarting services" 
+cd docker/homegear
+# docker compose start
+cd ../homeassistant
+# docker compose start
+cd ../node-red
+# docker compose start
